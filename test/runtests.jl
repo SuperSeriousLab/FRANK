@@ -4,6 +4,7 @@ using FRANK: STATE_TRANSITION, INTENT_PARSE, CONFIDENCE_SCORE, ACTION_CANDIDATES
              EXECUTION, CORRECTION, ERROR, IDLE_TICK
 using JSON3
 using Dates
+using Random
 
 @testset "FRANK Debug Protocol" begin
 
@@ -390,4 +391,159 @@ using Dates
         parsed = JSON3.read(strip(output), Dict{String,Any})
         @test parsed["component"] == ""
     end
+end
+
+# ---------------------------------------------------------------
+# Subscribe / unsubscribe! / fanout (v0.2 API)
+# ---------------------------------------------------------------
+@testset "FRANK subscribe/unsubscribe!/fanout" begin
+
+    # ── subscribe → callback invoked ────────────────────────────
+    @testset "subscribe + emit → callback invoked" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+        received = []
+
+        sid = subscribe(e, (c, et, s) -> true, evt -> push!(received, evt))
+        emit!(e, "comp", STATE_TRANSITION, Dict{String,Any}("x" => 1))
+
+        @test length(received) == 1
+        @test received[1]["component"] == "comp"
+        @test received[1]["event_type"] == "STATE_TRANSITION"
+        @test received[1]["state"]["x"] == 1
+    end
+
+    # ── filter_fn rejects → callback NOT invoked ────────────────
+    @testset "filter_fn rejects → callback not invoked" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+        received = []
+
+        # Only accept ERROR events
+        subscribe(e, (c, et, s) -> et == ERROR, evt -> push!(received, evt))
+        emit!(e, "comp", STATE_TRANSITION, Dict{String,Any}())
+        emit!(e, "comp", IDLE_TICK, Dict{String,Any}())
+
+        @test isempty(received)
+
+        # Now emit an ERROR — should arrive
+        emit!(e, "comp", ERROR, Dict{String,Any}("err" => "boom"))
+        @test length(received) == 1
+        @test received[1]["event_type"] == "ERROR"
+    end
+
+    # ── unsubscribe → no more calls ─────────────────────────────
+    @testset "unsubscribe! → no more calls" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+        received = []
+
+        sid = subscribe(e, (c, et, s) -> true, evt -> push!(received, evt))
+        emit!(e, "a", STATE_TRANSITION, Dict{String,Any}())
+        @test length(received) == 1
+
+        result = unsubscribe!(e, sid)
+        @test result == true
+
+        emit!(e, "b", STATE_TRANSITION, Dict{String,Any}())
+        @test length(received) == 1  # still 1, no new delivery
+    end
+
+    # ── double unsubscribe → second call returns false ──────────
+    @testset "double unsubscribe! returns false" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+
+        sid = subscribe(e, (c, et, s) -> true, _ -> nothing)
+        @test unsubscribe!(e, sid) == true
+        @test unsubscribe!(e, sid) == false
+    end
+
+    # ── multiple subscribers each get called ────────────────────
+    @testset "multiple subscribers all receive event" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+        counts = [0, 0, 0]
+
+        subscribe(e, (c, et, s) -> true, _ -> (counts[1] += 1))
+        subscribe(e, (c, et, s) -> true, _ -> (counts[2] += 1))
+        subscribe(e, (c, et, s) -> true, _ -> (counts[3] += 1))
+
+        emit!(e, "multi", EXECUTION, Dict{String,Any}())
+
+        @test counts == [1, 1, 1]
+    end
+
+    # ── callback throwing does NOT break emit! ───────────────────
+    @testset "throwing callback does not break emit!" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+        good_received = []
+
+        subscribe(e, (c, et, s) -> true, _ -> error("deliberate error"))
+        subscribe(e, (c, et, s) -> true, evt -> push!(good_received, evt))
+
+        # emit! must return an event (not rethrow)
+        evt = emit!(e, "safe", IDLE_TICK, Dict{String,Any}("k" => "v"))
+        @test evt isa FrankEvent
+
+        # IO write still happened
+        output = String(take!(buf))
+        @test contains(output, "safe")
+
+        # Good subscriber still received
+        @test length(good_received) == 1
+    end
+
+    # ── SubscriptionID is opaque and unique ─────────────────────
+    @testset "SubscriptionID values are distinct" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+
+        s1 = subscribe(e, (c, et, s) -> true, _ -> nothing)
+        s2 = subscribe(e, (c, et, s) -> true, _ -> nothing)
+        @test s1 isa SubscriptionID
+        @test s2 isa SubscriptionID
+        @test s1.id != s2.id
+    end
+
+    # ── Thread safety (basic) ────────────────────────────────────
+    @testset "thread safety — concurrent emit with subscribers" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf)
+        received = Channel{Dict}(200)
+
+        subscribe(e, (c, et, s) -> true, evt -> put!(received, evt))
+        n = 50
+
+        @sync for i in 1:n
+            @async emit!(e, "t-$i", EXECUTION, Dict{String,Any}("i" => i))
+        end
+
+        close(received)
+        count = 0
+        for _ in received
+            count += 1
+        end
+        @test count == n
+
+        # IO also got all n lines
+        output = String(take!(buf))
+        lines = filter(!isempty, split(output, "\n"))
+        @test length(lines) == n
+    end
+
+    # ── Disabled emitter skips fanout ────────────────────────────
+    @testset "disabled emitter — fanout also skipped" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf, enabled=false)
+        received = []
+
+        subscribe(e, (c, et, s) -> true, evt -> push!(received, evt))
+        result = emit!(e, "ghost", STATE_TRANSITION, Dict{String,Any}())
+
+        @test result === nothing
+        @test isempty(received)
+    end
+
 end
