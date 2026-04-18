@@ -97,17 +97,20 @@ function emit!(emitter::FrankEmitter, component::String, event_type::EventType,
 
     # Fanout to subscribers (IO write happens first, always)
     if !isempty(emitter.subscribers)
-        event_dict = Dict{String,Any}(
-            "component"  => component,
-            "event_type" => string(event_type),
-            "state"      => state,
-            "transition" => transition,
-            "timestamp"  => time(),
-        )
         lock(emitter.subs_lock) do
             for (_, filter_fn, callback) in emitter.subscribers
                 try
-                    filter_fn(component, event_type, state) && callback(event_dict)
+                    if filter_fn(component, event_type, state)
+                        # Create fresh event_dict for each subscriber to ensure isolation
+                        event_dict = Dict{String,Any}(
+                            "component"  => component,
+                            "event_type" => string(event_type),
+                            "state"      => copy(state),
+                            "transition" => transition,
+                            "timestamp"  => time(),
+                        )
+                        callback(event_dict)
+                    end
                 catch e
                     @warn "FRANK subscriber callback errored" exception=e
                 end

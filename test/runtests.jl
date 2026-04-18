@@ -547,3 +547,6 @@ end
     end
 
 end
+
+# Edge case tests
+include("edge_cases_test.jl")
