@@ -15,10 +15,19 @@ zero-overhead when disabled.
 - **Zero overhead when idle** — emit path skips serialization if subscriber list is empty
 - **Never raises** — all emit paths are fire-and-forget; errors are swallowed silently
 
+## Install
+
+```julia
+using Pkg
+Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/SuperSeriousLab/JuliaRegistry.git"))
+Pkg.add("FRANK")
+```
+
 ## Quick Start
 
 ```julia
 using Pkg
+Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/SuperSeriousLab/JuliaRegistry.git"))
 Pkg.add("FRANK")
 
 using FRANK, Dates
