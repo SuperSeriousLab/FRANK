@@ -65,9 +65,9 @@ JUI-specific event types (emitted by `JUI` when `FRANK` is loaded) are defined i
 ```julia
 using FRANK
 
-emitter = get_global_emitter()  # or pass your own
-
+emitter = FrankEmitter(stderr, true, STATE_TRANSITION)
 session_id = "abc123"
+
 sub_id = subscribe(emitter) do event
     if get(event.state, "session_id", "") == session_id
         # handle session-scoped event
