@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://igor.dev/frank/v0.1/event.schema.json",
+  "title": "FRANK Debug Protocol Event v0.1",
+  "description": "Single JSONL event emitted on stderr for AI agent debugging. One line = one event.",
+  "type": "object",
+  "required": ["frank_v", "ts", "component", "event_type", "state"],
+  "properties": {
+    "frank_v": {
+      "type": "integer",
+      "const": 1,
+      "description": "Protocol version. Always 1 for v0.1."
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of event emission."
+    },
+    "component": {
+      "type": "string",
+      "description": "Dot-separated component path (e.g., 'igor.direct', 'jui.input')."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "STATE_TRANSITION",
+        "INTENT_PARSE",
+        "CONFIDENCE_SCORE",
+        "ACTION_CANDIDATES",
+        "EXECUTION",
+        "CORRECTION",
+        "ERROR",
+        "IDLE_TICK"
+      ],
+      "description": "Category of debug event."
+    },
+    "state": {
+      "type": "object",
+      "description": "Arbitrary key-value payload. Contents vary by event_type.",
+      "additionalProperties": true,
+      "examples": [
+        {
+          "input": "list big files",
+          "intent": "list_files_by_size",
+          "confidence": 0.91,
+          "candidates": [
+            {"cmd": "du -sh * | sort -rh", "score": 0.91},
+            {"cmd": "ls -lS", "score": 0.67}
+          ]
+        },
+        {
+          "action": "start",
+          "mode": "caveman"
+        }
+      ]
+    },
+    "transition": {
+      "type": ["string", "null"],
+      "description": "Target state name after this event. Null if no state change.",
+      "default": null
+    }
+  },
+  "additionalProperties": false
+}
