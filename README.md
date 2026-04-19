@@ -26,10 +26,6 @@ Pkg.add("FRANK")
 ## Quick Start
 
 ```julia
-using Pkg
-Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/SuperSeriousLab/JuliaRegistry.git"))
-Pkg.add("FRANK")
-
 using FRANK, Dates
 
 emitter = FrankEmitter(stderr, true, STATE_TRANSITION)
@@ -111,4 +107,4 @@ using JUI, FRANK
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE).
+MIT License. See [LICENSE](LICENSE).
