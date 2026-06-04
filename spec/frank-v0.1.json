@@ -18,7 +18,7 @@
     },
     "component": {
       "type": "string",
-      "description": "Dot-separated component path (e.g., 'igor.direct', 'jui.input')."
+      "description": "Dot-separated component path (e.g., 'igor.direct', 'teletui.input')."
     },
     "event_type": {
       "type": "string",

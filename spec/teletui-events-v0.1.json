@@ -1,18 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "http://192.168.14.77:3000/eidos/FRANK/spec/jui-events-v0.1.json",
-  "title": "JUI event types on FRANK wire",
-  "description": "JUI-specific events emitted through FRANK by JUIFRANKExt. Companion to frank-v0.1.json (generic envelope). Each definition specifies the expected component, transition, and state field schema for one JUI event kind.",
-  "$comment": "All events use the frank-v0.1.json envelope: frank_v=1, event_type=STATE_TRANSITION, ts=ISO8601. This file constrains the JUI-specific component + transition + state combinations.",
+  "$id": "https://github.com/SuperSeriousLab/FRANK.jl/blob/master/spec/teletui-events-v0.1.json",
+  "title": "TeleTUI event types on FRANK wire",
+  "description": "TeleTUI-specific events emitted through FRANK by TeleTUIFRANKExt. Companion to frank-v0.1.json (generic envelope). Each definition specifies the expected component, transition, and state field schema for one TeleTUI event kind.",
+  "$comment": "All events use the frank-v0.1.json envelope: frank_v=1, event_type=STATE_TRANSITION, ts=ISO8601. This file constrains the TeleTUI-specific component + transition + state combinations.",
   "definitions": {
-    "jui.session.created": {
+    "teletui.session.created": {
       "title": "Session created",
-      "description": "Emitted when a new JUI session is registered in the session registry.",
+      "description": "Emitted when a new TeleTUI session is registered in the session registry.",
       "type": "object",
       "properties": {
         "component": {
           "type": "string",
-          "const": "jui.session"
+          "const": "teletui.session"
         },
         "event_type": {
           "type": "string",
@@ -42,14 +42,14 @@
       "required": ["component", "event_type", "transition", "state"]
     },
 
-    "jui.session.closed": {
+    "teletui.session.closed": {
       "title": "Session closed",
-      "description": "Emitted when a JUI session is torn down via close_session!().",
+      "description": "Emitted when a TeleTUI session is torn down via close_session!().",
       "type": "object",
       "properties": {
         "component": {
           "type": "string",
-          "const": "jui.session"
+          "const": "teletui.session"
         },
         "event_type": {
           "type": "string",
@@ -74,14 +74,14 @@
       "required": ["component", "event_type", "transition", "state"]
     },
 
-    "jui.input.input_received": {
+    "teletui.input.input_received": {
       "title": "Input received",
       "description": "Emitted when a client input event (key, mouse, resize) is dispatched to the server-side session.",
       "type": "object",
       "properties": {
         "component": {
           "type": "string",
-          "const": "jui.input"
+          "const": "teletui.input"
         },
         "event_type": {
           "type": "string",
@@ -110,14 +110,14 @@
       "required": ["component", "event_type", "transition", "state"]
     },
 
-    "jui.snapshot.snapshot_sent": {
+    "teletui.snapshot.snapshot_sent": {
       "title": "Snapshot sent",
       "description": "Emitted when a full Buffer snapshot is sent to a newly attached client.",
       "type": "object",
       "properties": {
         "component": {
           "type": "string",
-          "const": "jui.snapshot"
+          "const": "teletui.snapshot"
         },
         "event_type": {
           "type": "string",
@@ -147,14 +147,14 @@
       "required": ["component", "event_type", "transition", "state"]
     },
 
-    "jui.diff.diff_emitted": {
+    "teletui.diff.diff_emitted": {
       "title": "Diff emitted",
       "description": "Emitted when a cell-diff stream entry is sent to a connected client after a render cycle.",
       "type": "object",
       "properties": {
         "component": {
           "type": "string",
-          "const": "jui.diff"
+          "const": "teletui.diff"
         },
         "event_type": {
           "type": "string",

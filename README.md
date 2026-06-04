@@ -57,8 +57,8 @@ Every FRANK event:
 }
 ```
 
-JUI-specific event types (emitted by `JUI` when `FRANK` is loaded) are defined in
-`spec/jui-events-v0.1.json`.
+TeleTUI-specific event types (emitted by `TeleTUI` when `FRANK` is loaded) are defined in
+`spec/teletui-events-v0.1.json`.
 
 ## Agent Attach Pattern
 
@@ -93,15 +93,15 @@ Or pipe to a log processor:
 julia myapp.jl 2>&1 1>/dev/null | jq 'select(.event_type == "ERROR")'
 ```
 
-## Integration with JUI
+## Integration with TeleTUI
 
-FRANK is an optional weak dependency of [JUI](https://github.com/SuperSeriousLab/JUI.jl).
-When both packages are loaded, JUI automatically emits session lifecycle events
+FRANK is an optional weak dependency of [TeleTUI](https://github.com/SuperSeriousLab/TeleTUI.jl).
+When both packages are loaded, TeleTUI automatically emits session lifecycle events
 (`session_create`, `session_close`, `input_received`, `diff_emitted`,
 `snapshot_sent`, `auth.ok`, `auth.reject`) through FRANK.
 
 ```julia
-using JUI, FRANK
+using TeleTUI, FRANK
 # FRANK events now flow automatically
 ```
 
