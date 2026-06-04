@@ -1,6 +1,6 @@
 name = "FRANK"
 uuid = "f7a4e1b0-d8c2-4a3e-b5f1-0c9d2e8a7b6c"
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
@@ -8,4 +8,5 @@ Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
 [compat]
 julia = "1.10"
+Dates = "1"
 JSON3 = "1"
