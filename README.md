@@ -95,7 +95,7 @@ julia myapp.jl 2>&1 1>/dev/null | jq 'select(.event_type == "ERROR")'
 
 ## Integration with JUI
 
-FRANK is an optional weak dependency of [JUI](https://github.com/SuperSeriousLab/JUI).
+FRANK is an optional weak dependency of [JUI](https://github.com/SuperSeriousLab/JUI.jl).
 When both packages are loaded, JUI automatically emits session lifecycle events
 (`session_create`, `session_close`, `input_received`, `diff_emitted`,
 `snapshot_sent`, `auth.ok`, `auth.reject`) through FRANK.
