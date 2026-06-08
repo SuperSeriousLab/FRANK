@@ -378,15 +378,15 @@ end
 @testset "FRANK Edge Cases — Configuration" begin
 
     # ─────────────────────────────────────────────────────────────────────
-    # Edge case 16: configure! with both enabled and io
+    # Edge case 16: update! with both enabled and io
     # ─────────────────────────────────────────────────────────────────────
-    @testset "configure! both enabled and io simultaneously" begin
+    @testset "update! both enabled and io simultaneously" begin
         buf1 = IOBuffer()
         buf2 = IOBuffer()
         e = FrankEmitter(io=buf1)
 
         # Change both at once
-        configure!(e; enabled=false, io=buf2)
+        update!(e; enabled=false, io=buf2)
 
         @test e.enabled == false
         @test e.io === buf2
@@ -397,30 +397,57 @@ end
     end
 
     # ─────────────────────────────────────────────────────────────────────
-    # Edge case 17: configure! with only enabled (io stays same)
+    # Edge case 17: update! with only enabled (io stays same)
     # ─────────────────────────────────────────────────────────────────────
-    @testset "configure! only enabled preserves io" begin
+    @testset "update! only enabled preserves io" begin
         buf = IOBuffer()
         e = FrankEmitter(io=buf)
 
-        configure!(e; enabled=false)
+        update!(e; enabled=false)
         @test e.io === buf  # IO unchanged
 
-        configure!(e; enabled=true)
+        update!(e; enabled=true)
         @test e.io === buf  # IO still same
     end
 
     # ─────────────────────────────────────────────────────────────────────
-    # Edge case 18: configure! with only io (enabled stays same)
+    # Edge case 18: update! with only io (enabled stays same)
     # ─────────────────────────────────────────────────────────────────────
-    @testset "configure! only io preserves enabled" begin
+    @testset "update! only io preserves enabled" begin
         buf1 = IOBuffer()
         buf2 = IOBuffer()
         e = FrankEmitter(io=buf1, enabled=false)
 
-        configure!(e; io=buf2)
+        update!(e; io=buf2)
         @test e.enabled == false  # enabled unchanged
         @test e.io === buf2
+    end
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Edge case 19: min_level gates emit! by enum ordinal
+    # ─────────────────────────────────────────────────────────────────────
+    @testset "min_level gates emit! output" begin
+        buf = IOBuffer()
+        e = FrankEmitter(io=buf, enabled=true)
+
+        # Default threshold (IDLE_TICK=0, lowest severity): everything passes.
+        @test emit!(e, "c", STATE_TRANSITION, Dict{String,Any}()) !== nothing
+        @test emit!(e, "c", IDLE_TICK, Dict{String,Any}()) !== nothing
+
+        # Raise threshold above STATE_TRANSITION: below-threshold dropped.
+        update!(e; min_level=EXECUTION)
+        @test e.min_level === EXECUTION
+        @test emit!(e, "c", STATE_TRANSITION, Dict{String,Any}()) === nothing  # below
+        @test emit!(e, "c", INTENT_PARSE, Dict{String,Any}())    === nothing  # below
+        @test emit!(e, "c", EXECUTION, Dict{String,Any}())   !== nothing      # at
+        @test emit!(e, "c", ERROR, Dict{String,Any}())       !== nothing      # above
+
+        # Dropped events write nothing to IO.
+        buf2 = IOBuffer()
+        e2 = FrankEmitter(io=buf2, enabled=true)
+        update!(e2; min_level=ERROR)
+        emit!(e2, "c", STATE_TRANSITION, Dict{String,Any}())
+        @test isempty(String(take!(buf2)))
     end
 
 end

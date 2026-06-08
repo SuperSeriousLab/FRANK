@@ -23,16 +23,16 @@
     "event_type": {
       "type": "string",
       "enum": [
+        "IDLE_TICK",
         "STATE_TRANSITION",
         "INTENT_PARSE",
         "CONFIDENCE_SCORE",
         "ACTION_CANDIDATES",
         "EXECUTION",
         "CORRECTION",
-        "ERROR",
-        "IDLE_TICK"
+        "ERROR"
       ],
-      "description": "Category of debug event."
+      "description": "Category of debug event. Listed in ascending severity order; emitters may suppress events below a configured min_level floor (IDLE_TICK lowest, ERROR highest)."
     },
     "state": {
       "type": "object",

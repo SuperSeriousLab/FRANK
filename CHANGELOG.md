@@ -1,5 +1,14 @@
 # FRANK Changelog
 
+## v0.3.0 — 2026-06-08
+
+### Runtime config cleanup + working severity filter
+
+- **`configure!` → `update!`** (**breaking**): renamed for nomen-omen clarity — the function patches emitter fields in place. Body rewritten from `!isnothing(x) && (assign)` short-circuit side-effects to explicit `if x !== nothing` blocks. No deprecated alias (pre-1.0, no external callers). Update call sites: `update!(emitter; enabled, io, min_level)`.
+- **`min_level` is now live**: `emit!` gates on `emitter.min_level`, dropping events whose `EventType` ranks below the floor before any IO or fanout. Previously a dead struct field that `update!`/`configure!` could not even set.
+- **`update!` covers `min_level`**: third keyword added; `FrankEmitter` constructor also accepts `min_level=` (defaults `IDLE_TICK` = emit everything, preserving prior behavior).
+- **`EventType` reordered by severity** (ascending: `IDLE_TICK`(0) … `ERROR`(7)): ordinals were categorical, so the `min_level` cutoff filtered by declaration accident rather than importance. **Wire-compatible** — JSON3 serializes the enum by string name, so JSONL output is unchanged; `spec/frank-v0.1.json` enum reordered to match (string set, order cosmetic) with a severity note.
+
 ## v0.2.1 — 2026-06-04
 
 - Add `Dates` compat entry (General registry AutoMerge requirement). No code changes.

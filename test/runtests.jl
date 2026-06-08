@@ -154,35 +154,35 @@ using Random
     end
 
     # ---------------------------------------------------------------
-    # 6. configure! — toggle enabled, change IO
+    # 6. update! — toggle enabled, change IO
     # ---------------------------------------------------------------
-    @testset "configure!" begin
+    @testset "update!" begin
         buf1 = IOBuffer()
         buf2 = IOBuffer()
         e = FrankEmitter(io=buf1)
 
         # Disable at runtime
-        configure!(e; enabled=false)
+        update!(e; enabled=false)
         @test e.enabled == false
         emit!(e, "x", ERROR, Dict{String,Any}())
         @test length(take!(buf1)) == 0
 
         # Re-enable
-        configure!(e; enabled=true)
+        update!(e; enabled=true)
         @test e.enabled == true
         emit!(e, "x", ERROR, Dict{String,Any}("alive" => true))
         @test length(take!(buf1)) > 0
 
         # Change IO target
-        configure!(e; io=buf2)
+        update!(e; io=buf2)
         @test e.io === buf2
         emit!(e, "x", IDLE_TICK, Dict{String,Any}("target" => "buf2"))
         @test length(take!(buf1)) == 0  # nothing new in buf1
         output2 = String(take!(buf2))
         @test contains(output2, "buf2")
 
-        # configure! returns the emitter
-        ret = configure!(e; enabled=false)
+        # update! returns the emitter
+        ret = update!(e; enabled=false)
         @test ret === e
     end
 
