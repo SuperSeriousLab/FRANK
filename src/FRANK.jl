@@ -27,11 +27,6 @@ Subscribe/unsubscribe! fanout for agent attach; `update!` for runtime config;
     ERROR              # 7 — highest severity
 end
 
-struct ActionCandidate
-    cmd::String
-    score::Float64
-end
-
 struct FrankEvent
     frank_v::Int
     ts::DateTime
