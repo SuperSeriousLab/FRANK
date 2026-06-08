@@ -6,9 +6,10 @@ export FrankEvent, FrankEmitter, emit!, update!
 export EventType
 export SubscriptionID, subscribe, unsubscribe!
 
-"""FRANK v0.2 — debug protocol for AI-agent-friendly diagnostics.
+"""FRANK v1.0 — debug protocol for AI-agent-friendly diagnostics.
 Transport: stderr JSONL. One event per line. Agent reads `2>frank.jsonl`.
-v0.2 adds subscribe/unsubscribe! fanout for agent attach."""
+Subscribe/unsubscribe! fanout for agent attach; `update!` for runtime config;
+`min_level` severity gating on `emit!`."""
 
 # Ordered by severity (ascending): ordinal IS the importance rank, so
 # `min_level` gating in emit! drops everything below the chosen floor.

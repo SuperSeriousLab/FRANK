@@ -1,6 +1,11 @@
 # FRANK Changelog
 
-## v0.3.0 — 2026-06-08
+## v1.0.0 — 2026-06-08
+
+First stable release. API is now settled and covered by 207 tests plus the
+subscribe/fanout and edge-case suites. **Breaking** major bump — see the
+`configure!` → `update!` rename below. (Content is the v0.3.0 work promoted to
+1.0.0; no separate 0.3.0 registry release.)
 
 ### Runtime config cleanup + working severity filter
 
