@@ -19,8 +19,7 @@ zero-overhead when disabled.
 
 ```julia
 using Pkg
-Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/SuperSeriousLab/JuliaRegistry.git"))
-Pkg.add("FRANK")
+Pkg.add(url = "https://github.com/SuperSeriousLab/FRANK.jl.git")
 ```
 
 ## Quick Start
@@ -95,7 +94,7 @@ julia myapp.jl 2>&1 1>/dev/null | jq 'select(.event_type == "ERROR")'
 
 ## Integration with TeleTUI
 
-FRANK is an optional weak dependency of [TeleTUI](https://github.com/SuperSeriousLab/TeleTUI.jl).
+FRANK is an optional weak dependency of [TeleTUI](https://codeberg.org/JohnCobbler/TeleTUI.jl).
 When both packages are loaded, TeleTUI automatically emits session lifecycle events
 (`session_create`, `session_close`, `input_received`, `diff_emitted`,
 `snapshot_sent`, `auth.ok`, `auth.reject`) through FRANK.
